@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'wikipedia_service.dart';
 
@@ -32,7 +33,50 @@ class RandomWikipediaApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: const RandomArticleScreen(),
+      home: const SplashScreen(), // Show splash screen first
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToMainScreen();
+  }
+
+  // Navigate to the main screen after a delay
+  _navigateToMainScreen() async {
+    await Future.delayed(const Duration(seconds: 3));
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const RandomArticleScreen()),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
+      body: Center(
+        child: Text(
+          'Random Wikipedia',
+          style: TextStyle(
+            fontSize: 30,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -116,8 +160,32 @@ class RandomArticleScreenState extends State<RandomArticleScreen> {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
-                    title: const Text('About'),
-                    content: const Text('Random Wikipedia is a simple app that fetches random Wikipedia articles.'),
+                    title: const Text('About Random Wikipedia'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Random Wikipedia is a simple app that fetches random Wikipedia articles.'),
+                        const SizedBox(height: 16),
+                        const Text('App Version: 1.0.0'),
+                        const SizedBox(height: 16),
+                        GestureDetector(
+                          onTap: () {
+                            // Add link to GitHub or website if available
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Link to GitHub/Website coming soon')),
+                            );
+                          },
+                          child: const Text(
+                            'Visit our GitHub or Website',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
@@ -144,8 +212,11 @@ class RandomArticleScreenState extends State<RandomArticleScreen> {
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        child: const Text('Exit'),
+                        onPressed: () {
+                          Navigator.pop(context); // Close the dialog
+                          SystemNavigator.pop(); // Exit the app
+                        },
+                        child: Text('Exit'),
                       ),
                     ],
                   ),
@@ -193,39 +264,41 @@ class RandomArticleScreenState extends State<RandomArticleScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 60), // Add padding to bottom of content
+              const SizedBox(height: 50), // Add padding to bottom of content
             ],
           ),
         ),
       )
           : const Center(child: Text('No article available')),
-      floatingActionButton: Stack(
-        children: [
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: FloatingActionButton.extended(
-              onPressed: _loadRandomArticle,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Next Article'),
-              backgroundColor: Colors.blueAccent,
+      floatingActionButton: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              bottom: 20,
+              left: 20,
+              child: FloatingActionButton.extended(
+                onPressed: _loadRandomArticle,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Next Article'),
+                backgroundColor: Colors.blueAccent,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: FloatingActionButton.extended(
-              onPressed: () {
-                final title = _article?['title'] ?? 'Unknown';
-                final url = _article?['content_urls']?['desktop']?['page'];
-                if (url != null) _shareArticle(title, url);
-              },
-              icon: const Icon(Icons.share),
-              label: const Text('Share'),
-              backgroundColor: Colors.green,
+            Positioned(
+              bottom: 20,
+              right: 20,
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  final title = _article?['title'] ?? 'Unknown';
+                  final url = _article?['content_urls']?['desktop']?['page'];
+                  if (url != null) _shareArticle(title, url);
+                },
+                icon: const Icon(Icons.share),
+                label: const Text('Share'),
+                backgroundColor: Colors.green,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
