@@ -193,42 +193,40 @@ class RandomArticleScreenState extends State<RandomArticleScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        final title = _article?['title'] ?? 'Unknown';
-                        final url = _article?['content_urls']?['desktop']?['page'];
-                        if (url != null) _shareArticle(title, url);
-                      },
-                      icon: const Icon(Icons.share),
-                      label: const Text('Share Article'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: _loadRandomArticle,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Next Article'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const SizedBox(height: 60), // Add padding to bottom of content
             ],
           ),
         ),
       )
           : const Center(child: Text('No article available')),
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: FloatingActionButton.extended(
+              onPressed: _loadRandomArticle,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Next Article'),
+              backgroundColor: Colors.blueAccent,
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton.extended(
+              onPressed: () {
+                final title = _article?['title'] ?? 'Unknown';
+                final url = _article?['content_urls']?['desktop']?['page'];
+                if (url != null) _shareArticle(title, url);
+              },
+              icon: const Icon(Icons.share),
+              label: const Text('Share'),
+              backgroundColor: Colors.green,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
